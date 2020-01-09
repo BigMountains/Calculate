@@ -14,10 +14,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,14 +63,14 @@ public class RuleService implements InitializingBean {
      * @param score
      * @return
      */
-    public Set<AbstractRule> getRules(AbstractScore score) {
+    public List<AbstractRule> getRules(AbstractScore score) {
         String gender = score.getGender().getName();
         String grade = score.getGrade().getName();
         String project = ProjectPacket.getProject(score.getClass()).name();
         //获取规则列表
         List<Object> rules = ruleContainer.get(gender).get(grade).get(project);
         //将规则列表进行转换
-        Set<AbstractRule> formatRules = new HashSet<>();
+        List<AbstractRule> formatRules = new ArrayList<>();
         rules.forEach(rule -> {
             formatRules.add(JSON.parseObject(
                     ((JSONObject) rule).toJSONString(),
@@ -83,30 +80,11 @@ public class RuleService implements InitializingBean {
         if (formatRules.isEmpty()) {
             throw new NullPointerException("规则集合中找不到对应的规则");
         }
-
-        //对规则做特殊处理  例如 BMI 有存在无穷大与无穷小的情况
-        specialTreatment(formatRules,score);
+        //将规则进行排序  方便计算
+        Collections.sort(formatRules);
         return formatRules;
     }
 
-    private Set<AbstractRule> specialTreatment(Set<AbstractRule> rules,AbstractScore score){
-        switch (ProjectPacket.getProject(score.getClass())){
-            case BMI:
-                rules.forEach(r->{
-                    BmiRule rule = (BmiRule)r;
-                    if(rule.getRangeMax() == -1){
-                        rule.setRangeMax(Double.MAX_VALUE);
-                    }
-                    if(rule.getRangeMin() == -1){
-                        rule.setRangeMin(Double.MIN_VALUE);
-                    }
-                });
-                break;
-            default:
-                break;
-        }
-        return rules;
-    }
 
 
 }

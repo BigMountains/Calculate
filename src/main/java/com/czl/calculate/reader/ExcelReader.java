@@ -30,6 +30,14 @@ public class ExcelReader {
         result.addAll(readBmi(wb));
         //读取肺活量
         result.addAll(readVitalCapacity(wb));
+        //读取50米跑
+        result.addAll(readFiftyMeterRun(wb));
+        //读取坐位体前屈
+        result.addAll(readSeatedForwardFlexion(wb));
+        //读取跳绳
+        result.addAll(readSkipping(wb));
+        //读取跳远
+        result.addAll(readJump(wb));
 
         String pretty = JSON.toJSONString(result, SerializerFeature.PrettyFormat, SerializerFeature.WriteMapNullValue,
                 SerializerFeature.WriteDateUseDateFormat);
@@ -47,6 +55,7 @@ public class ExcelReader {
         manBMI.addAll(womanBMI);
         return manBMI;
     }
+
     private static JSONArray readBmi(Workbook wb, int sheetAt) {
         JSONArray ja = new JSONArray();
         Sheet sheet = wb.getSheetAt(sheetAt);
@@ -62,23 +71,9 @@ public class ExcelReader {
                 obj.put("level", row.getCell(0).getStringCellValue());
                 obj.put("score", row.getCell(1).getNumericCellValue());
                 String range = row.getCell(j).getStringCellValue();
-                //解析range
-                double rangeMin = 0;
-                double rangeMax = 0;
-                if (range.contains("≤")) {
-                    rangeMin = -1;
-                    rangeMax = Double.valueOf(range.split("≤")[1]);
-                } else if (range.contains("≥")) {
-                    rangeMin = Double.valueOf(range.split("≥")[1]);
-                    rangeMax = -1;
-                } else if (range.contains("~")) {
-                    rangeMin = Double.valueOf(range.split("~")[0]);
-                    rangeMax = Double.valueOf(range.split("~")[1]);
-                }
-                obj.put("rangeMin", rangeMin);
-                obj.put("rangeMax", rangeMax);
+                obj.put("value",range);
                 //获取权重
-                obj.put("weight",getWeight(wb,obj.getString("grade"),Project.BMI));
+                obj.put("weight", getWeight(wb, obj.getString("grade"), Project.BMI));
                 ja.add(obj);
             }
         }
@@ -87,30 +82,138 @@ public class ExcelReader {
 
     /**
      * 读取肺活量
+     *
      * @param wb
      * @return
      */
-    private static JSONArray readVitalCapacity(Workbook wb){
-        JSONArray manVitalCapacity = readVitalCapacity(wb,3);
-        JSONArray womanVitalCapacity = readVitalCapacity(wb,4);
+    private static JSONArray readVitalCapacity(Workbook wb) {
+        JSONArray manVitalCapacity = readVitalCapacity(wb, 3);
+        JSONArray womanVitalCapacity = readVitalCapacity(wb, 4);
         manVitalCapacity.addAll(womanVitalCapacity);
         return manVitalCapacity;
     }
-    private static JSONArray readVitalCapacity(Workbook wb,int sheetAt){
+
+    private static JSONArray readVitalCapacity(Workbook wb, int sheetAt) {
         JSONArray ja = new JSONArray();
         Sheet sheet = wb.getSheetAt(sheetAt);
         Row head = sheet.getRow(1);
-        for(int i=2;i<sheet.getPhysicalNumberOfRows();i++){
+        for (int i = 2; i < sheet.getPhysicalNumberOfRows(); i++) {
             Row row = sheet.getRow(i);
-            for(int j=2;j<row.getPhysicalNumberOfCells();j++){
+            for (int j = 2; j < row.getPhysicalNumberOfCells(); j++) {
                 JSONObject obj = new JSONObject();
-                obj.put("gender",sheetAt==3?MAN:WOMAN);
-                obj.put("project",Project.VITAL_CAPACITY.name());
-                obj.put("grade",head.getCell(j).getStringCellValue());
-                obj.put("level",row.getCell(0).getStringCellValue());
-                obj.put("score",row.getCell(1).getNumericCellValue());
+                obj.put("gender", sheetAt == 3 ? MAN : WOMAN);
+                obj.put("project", Project.VITAL_CAPACITY.name());
+                obj.put("grade", head.getCell(j).getStringCellValue());
+                obj.put("level", row.getCell(0).getStringCellValue());
+                obj.put("score", row.getCell(1).getNumericCellValue());
+                obj.put("value", row.getCell(j).getNumericCellValue());
                 //获取权重
-                obj.put("weight",getWeight(wb,obj.getString("grade"),Project.VITAL_CAPACITY));
+                obj.put("weight", getWeight(wb, obj.getString("grade"), Project.VITAL_CAPACITY));
+                ja.add(obj);
+            }
+        }
+        return ja;
+    }
+
+    /**
+     * 读取50米跑规则
+     *
+     * @param wb
+     * @return
+     */
+    private static JSONArray readFiftyMeterRun(Workbook wb) {
+        JSONArray manFiftyRun = readFiftyMeterRun(wb, 5);
+        JSONArray womanFiftyRun = readFiftyMeterRun(wb, 6);
+        manFiftyRun.addAll(womanFiftyRun);
+        return manFiftyRun;
+    }
+
+    private static JSONArray readFiftyMeterRun(Workbook wb, int sheetAt) {
+        JSONArray ja = new JSONArray();
+        Sheet sheet = wb.getSheetAt(sheetAt);
+        Row head = sheet.getRow(1);
+        for (int i = 2; i < sheet.getPhysicalNumberOfRows(); i++) {
+            Row row = sheet.getRow(i);
+            for (int j = 2; j < row.getPhysicalNumberOfCells(); j++) {
+                JSONObject obj = new JSONObject();
+                obj.put("gender", sheetAt == 5 ? MAN : WOMAN);
+                obj.put("project", Project.FIFTY_METER_RUN.name());
+                obj.put("grade", head.getCell(j).getStringCellValue());
+                obj.put("level", row.getCell(0).getStringCellValue());
+                obj.put("score", row.getCell(1).getNumericCellValue());
+                obj.put("value", row.getCell(j).getNumericCellValue());
+                //获取权重
+                obj.put("weight", getWeight(wb, obj.getString("grade"), Project.FIFTY_METER_RUN));
+                ja.add(obj);
+            }
+        }
+        return ja;
+    }
+
+    /**
+     * 读取坐位体前屈规则
+     *
+     * @param wb
+     * @return
+     */
+    private static JSONArray readSeatedForwardFlexion(Workbook wb) {
+        JSONArray manSeatForwardFlexion = readSeatedForwardFlexion(wb, 7);
+        JSONArray womanSeatForwardFlexion = readSeatedForwardFlexion(wb, 8);
+        manSeatForwardFlexion.addAll(womanSeatForwardFlexion);
+        return manSeatForwardFlexion;
+    }
+
+    private static JSONArray readSeatedForwardFlexion(Workbook wb, int sheetAt) {
+        JSONArray ja = new JSONArray();
+        Sheet sheet = wb.getSheetAt(sheetAt);
+        Row head = sheet.getRow(1);
+        for (int i = 2; i < sheet.getPhysicalNumberOfRows(); i++) {
+            Row row = sheet.getRow(i);
+            for (int j = 2; j < row.getPhysicalNumberOfCells(); j++) {
+                JSONObject obj = new JSONObject();
+                obj.put("gender", sheetAt == 7 ? MAN : WOMAN);
+                obj.put("project", Project.SEATED_FORWARD_FLEXION.name());
+                obj.put("grade", head.getCell(j).getStringCellValue());
+                obj.put("level", row.getCell(0).getStringCellValue());
+                obj.put("score", row.getCell(1).getNumericCellValue());
+                obj.put("value", row.getCell(j).getNumericCellValue());
+                //获取权重
+                obj.put("weight", getWeight(wb, obj.getString("grade"), Project.SEATED_FORWARD_FLEXION));
+                ja.add(obj);
+            }
+        }
+        return ja;
+    }
+
+    /**
+     * 读取跳绳规则
+     *
+     * @param wb
+     * @return
+     */
+    private static JSONArray readSkipping(Workbook wb) {
+        JSONArray manSkipping = readSkipping(wb, 9);
+        JSONArray womanSkipping = readSkipping(wb, 10);
+        manSkipping.addAll(womanSkipping);
+        return manSkipping;
+    }
+
+    private static JSONArray readSkipping(Workbook wb, int sheetAt) {
+        JSONArray ja = new JSONArray();
+        Sheet sheet = wb.getSheetAt(sheetAt);
+        Row head = sheet.getRow(1);
+        for (int i = 2; i < sheet.getPhysicalNumberOfRows(); i++) {
+            Row row = sheet.getRow(i);
+            for (int j = 2; j < row.getPhysicalNumberOfCells(); j++) {
+                JSONObject obj = new JSONObject();
+                obj.put("gender", sheetAt == 9 ? MAN : WOMAN);
+                obj.put("project", Project.ONE_MINUTE_SKIPPING.name());
+                obj.put("grade", head.getCell(j).getStringCellValue());
+                obj.put("level", row.getCell(0).getStringCellValue());
+                obj.put("score", row.getCell(1).getNumericCellValue());
+                obj.put("value", row.getCell(j).getNumericCellValue());
+                //获取权重
+                obj.put("weight", getWeight(wb, obj.getString("grade"), Project.ONE_MINUTE_SKIPPING));
                 ja.add(obj);
             }
         }
@@ -118,32 +221,72 @@ public class ExcelReader {
     }
 
 
+    /**
+     * 读取立定跳远规则
+     *
+     * @param wb
+     * @return
+     */
+    private static JSONArray readJump(Workbook wb) {
+        JSONArray manJump = readJump(wb, 11);
+        JSONArray womanJump = readJump(wb, 12);
+        manJump.addAll(womanJump);
+        return manJump;
+    }
 
+    private static JSONArray readJump(Workbook wb, int sheetAt) {
+        JSONArray ja = new JSONArray();
+        Sheet sheet = wb.getSheetAt(sheetAt);
+        Row head = sheet.getRow(1);
+        for (int i = 2; i < sheet.getPhysicalNumberOfRows(); i++) {
+            Row row = sheet.getRow(i);
+            for (int j = 2; j < row.getPhysicalNumberOfCells(); j++) {
+                JSONObject obj = new JSONObject();
+                obj.put("gender", sheetAt == 11 ? MAN : WOMAN);
+                obj.put("project", Project.STANDING_LONG_JUMP.name());
+                obj.put("grade", head.getCell(j).getStringCellValue());
+                obj.put("level", row.getCell(0).getStringCellValue());
+                obj.put("score", row.getCell(1).getNumericCellValue());
+                obj.put("value", row.getCell(j).getNumericCellValue());
+                //获取权重
+                obj.put("weight", getWeight(wb, obj.getString("grade"), Project.STANDING_LONG_JUMP));
+                ja.add(obj);
+            }
+        }
+        return ja;
+    }
 
-
-
-//    public JSONArray template(Workbook wb,int sheetAt){
+    /**
+     * 引体向上
+     *
+     * @return
+     * @Author LeoChen
+     * @Date 2020/1/9
+     * @Param
+     **/
+//    private static JSONArray readPullUp(Workbook wb) {
 //        JSONArray ja = new JSONArray();
-//        Sheet sheet = wb.getSheetAt(sheetAt);
+//        Sheet sheet = wb.getSheetAt(13);
 //        Row head = sheet.getRow(1);
-//        for(int i=2;i<sheet.getPhysicalNumberOfRows();i++){
+//        for (int i = 2; i < sheet.getPhysicalNumberOfRows(); i++) {
 //            Row row = sheet.getRow(i);
-//            for(int j=2;j<row.getPhysicalNumberOfCells();j++){
+//            for (int j = 2; j < row.getPhysicalNumberOfCells(); j++) {
 //                JSONObject obj = new JSONObject();
-//                obj.put("gender",sheetAt==3?MAN:WOMAN);
-//                obj.put("project",Project.VITAL_CAPACITY.getName());
-//                obj.put("grade",head.getCell(j).getStringCellValue());
-//                obj.put("level",row.getCell(0).getStringCellValue());
-//                obj.put("score",row.getCell(1).getNumericCellValue());
+//                obj.put("gender", MAN);
+//                obj.put("project", Project.FIFTY_METER_RUN.name());
+//                obj.put("grade", head.getCell(j).getStringCellValue());
+//                obj.put("level", row.getCell(0).getStringCellValue());
+//                obj.put("score", row.getCell(1).getNumericCellValue());
 //                //获取权重
-//                obj.put("weight",getWeight(wb,obj.getString("grade"),Project.VITAL_CAPACITY));
+//                obj.put("weight", getWeight(wb, obj.getString("grade"), Project.STANDING_LONG_JUMP));
+//                //TODO 若规则不存在 则不用录入
+//
+//
 //                ja.add(obj);
 //            }
 //        }
 //        return ja;
 //    }
-
-
 
 
     /**

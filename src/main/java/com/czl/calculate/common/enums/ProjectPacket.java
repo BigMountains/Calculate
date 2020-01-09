@@ -1,20 +1,25 @@
 package com.czl.calculate.common.enums;
 
-import com.czl.calculate.model.rule.BmiRule;
-import com.czl.calculate.model.score.BmiScore;
-import com.czl.calculate.model.rule.AbstractRule;
-import com.czl.calculate.model.score.AbstractScore;
-import com.czl.calculate.service.calculator.BmiCalculator;
-import com.czl.calculate.service.calculator.Calculator;
+import com.czl.calculate.model.rule.*;
+import com.czl.calculate.model.score.*;
+import com.czl.calculate.service.calculator.*;
 import lombok.Getter;
-import org.apache.commons.math3.analysis.function.Abs;
 
 /**
  * 项目枚举类（表示规则与分数与计算器的对应关系)
  */
 public enum ProjectPacket {
 
-    BMI_PACKET(Project.BMI,BmiScore.class, BmiCalculator.class, BmiRule.class);
+    BMI_PACKET(Project.BMI,BmiScore.class, BmiCalculator.class, BmiRule.class),
+    VITAL_CAPACITY_PACKET(Project.VITAL_CAPACITY, VitalCapacityScore.class, VitalCapacityCalculator.class, VitalCapacityRule.class),
+    FIFTY_METER_RUN(Project.FIFTY_METER_RUN, FiftyMeterRunScore.class, FiftyMeterRunCalculator.class,FiftyMeterRunRule.class),
+    SEATED_FORWARD_FLEXION(Project.SEATED_FORWARD_FLEXION, SeatedForwardFlexionScore.class, SeatedForwardFlexionCalculator.class, SeatedForwardFlexionRule.class),
+    ONE_MINUTE_SKIPPING(Project.ONE_MINUTE_SKIPPING,OneMinuteSkippingScore.class,OneMinuteSkippingCalculator.class,OneMinuteSkippingRule.class),
+    ONE_MINUTE_SIT_UPS(Project.ONE_MINUTE_SIT_UPS,OneMinuteSitUpScore.class,OneMinuteSitUpCalculator.class,OneMinuteSitUpRule.class),
+    FIFTY_BY_EIGHT_BACK_AND_FORTH(Project.FIFTY_BY_EIGHT_BACK_AND_FORTH,FiftyByEightBackAndForthScore.class,FiftyByEightBackAndForthCalculator.class,FiftyByEightBackAndForthRule.class),
+    PULL_UP(Project.PULL_UP,PullUpScore.class,PullUpCalculator.class,PullUpRule.class),
+    STANDING_LONG_JUMP(Project.STANDING_LONG_JUMP,StandingLongJumpScore.class,StandingLongJumpCalculator.class,StandingLongJumpRule.class),
+    ENDURANCE_RUN(Project.ENDURANCE_RUN,EnduranceRunScore.class,EnduranceRunCalculator.class,EnduranceRunRule.class);
 
 
     @Getter
